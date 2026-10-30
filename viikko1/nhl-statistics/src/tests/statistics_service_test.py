@@ -1,5 +1,5 @@
 import unittest
-from statistics_service import StatisticsService, SortBy
+from statistics_service import StatisticsService
 from player import Player
 
 class PlayerReaderStub:
