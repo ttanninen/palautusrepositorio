@@ -8,7 +8,7 @@ class Player:
         self.goals = dict['goals']
         self.team = dict['team']
         self.games = dict['games']
-        self.id = dict['id']
+        self.id = dict.get('id')
 
         self.score = self.goals + self.assists
 
