@@ -41,8 +41,16 @@ class PlayerStats:
     def return_players(self):
         return self.players
 
+    def top_goal_scorers(self, n=10):
+        """Palauttaa n parasta maalintekijää pelaajalistan perusteella."""
+        return sorted(self.players, key=lambda player: player.goals, reverse=True)[:n]
+
     def top_scorers_by_nationality(self, nationality):
         players_by_nationality = [
             player for player in self.players if player.nationality == nationality
         ]
         return sorted(players_by_nationality, key=lambda player: player.score, reverse=True)
+
+    def top_scorers_by_team(self, team):
+        players_by_team = [player for player in self.players if player.team == team]
+        return sorted(players_by_team, key=lambda player: player.score, reverse=True)

@@ -46,8 +46,33 @@ def choose_nationality(nationalities):
         print("Please enter one of the listed nationality codes.")
 
 
-def build_table(season, nationality):
-    table = Table(title=f"Top scorers: {nationality} ({season})")
+def choose_team(teams):
+    available_teams = set(teams)
+    print(f"Available teams: {', '.join(sorted(available_teams))}")
+
+    while True:
+        team = input("Team: ").strip()
+        if team in available_teams:
+            return team
+        print("Please enter one of the listed teams.")
+
+
+def choose_player_filter():
+    print("Choose how to filter players:")
+    print("1. Nationality")
+    print("2. Team")
+
+    while True:
+        selection = input("Selection: ").strip()
+        if selection == "1":
+            return "nationality"
+        if selection == "2":
+            return "team"
+        print("Please enter 1 or 2.")
+
+
+def build_table(season, filter_value):
+    table = Table(title=f"Top scorers: {filter_value} ({season})")
     table.add_column("Rank", justify="right")
     table.add_column("Player")
     table.add_column("Team")
@@ -57,8 +82,8 @@ def build_table(season, nationality):
     table.add_column("Points", justify="right", style="bold")
     return table
 
-def display_players(players, season, nationality, console):
-    table = build_table(season, nationality)
+def display_players(players, season, filter_value, console):
+    table = build_table(season, filter_value)
 
     for rank, player in enumerate(players, start=1):
         table.add_row(
@@ -73,17 +98,31 @@ def display_players(players, season, nationality, console):
 
     console.print(table)
 
+
+def select_players(stats, all_players):
+    player_filter = choose_player_filter()
+
+    if player_filter == "team":
+        teams = {player.team for player in all_players}
+        filter_value = choose_team(teams)
+        players = stats.top_scorers_by_team(filter_value)
+    else:
+        nationalities = {player.nationality for player in all_players}
+        filter_value = choose_nationality(nationalities)
+        players = stats.top_scorers_by_nationality(filter_value)
+
+    return filter_value, players
+
+
 def main():
     season = choose_season()
     url = f"{BASE_URL}/{season}/players"
     reader = PlayerReader(url)
     all_players = reader.get_players()
-    nationalities = sorted({player.nationality for player in all_players})
-    nationality = choose_nationality(nationalities)
     stats = PlayerStats(all_players)
-    players = stats.top_scorers_by_nationality(nationality)
+    filter_value, players = select_players(stats, all_players)
 
-    display_players(players, season, nationality, Console())
+    display_players(players, season, filter_value, Console())
 
 if __name__ == "__main__":
     main()
