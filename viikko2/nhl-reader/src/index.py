@@ -36,7 +36,7 @@ def choose_season():
 
 
 def choose_nationality(nationalities):
-    available_nationalities = sorted({nationality for nationality in nationalities})
+    available_nationalities = set(nationalities)
     print(f"Available nationality codes: {', '.join(available_nationalities)}")
 
     while True:
@@ -46,7 +46,7 @@ def choose_nationality(nationalities):
         print("Please enter one of the listed nationality codes.")
 
 
-def display_players(players, season, nationality, console):
+def build_table(season, nationality):
     table = Table(title=f"Top scorers: {nationality} ({season})")
     table.add_column("Rank", justify="right")
     table.add_column("Player")
@@ -55,6 +55,10 @@ def display_players(players, season, nationality, console):
     table.add_column("Goals", justify="right")
     table.add_column("Assists", justify="right")
     table.add_column("Points", justify="right", style="bold")
+    return table
+
+def display_players(players, season, nationality, console):
+    table = build_table(season, nationality)
 
     for rank, player in enumerate(players, start=1):
         table.add_row(
@@ -68,7 +72,6 @@ def display_players(players, season, nationality, console):
         )
 
     console.print(table)
-
 
 def main():
     season = choose_season()

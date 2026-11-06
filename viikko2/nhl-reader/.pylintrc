@@ -26,4 +26,4 @@ max-nested-blocks=2
 
 [DESIGN]
 max-statements=10
-max-attributes=6
+max-attributes=8
