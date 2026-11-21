@@ -1,89 +1,74 @@
-# Copilot instructions for this repository
+# Copilot instructions for the tdd-ostoskori project
 
 ## Project context
 
-This repository is a learning project for the Ohtu course. The active application in this workspace is the Flask login app under `viikko3/login`.
+This project is a small TDD shopping-cart exercise in `viikko4/tdd-ostoskori`.
 
-The app is intentionally small and layered:
-- `src/app.py` defines Flask routes and request handling.
-- `src/services/user_service.py` contains the business logic: input validation, credential checks, and user creation.
-- `src/repositories/user_repository.py` stores users in memory (`_users`) and exposes the singleton `user_repository`.
-- `src/entities/user.py` is the plain data object for a `User`.
-- `src/AppLibrary.py` is a test helper for Robot Framework Browser tests.
-- `src/tests/*.robot` exercises the app through browser automation against the local server.
+- `src/tuote.py`: product data and its name/price accessors
+- `src/ostos.py`: one product plus quantity, including quantity changes and line totals
+- `src/ostoskori.py`: shopping-cart API under implementation
+- `src/tests/`: pytest/unittest-style tests
 
-The app uses an in-memory repository, not a database. There is a reset endpoint at `/tests/reset` used by the test suite to clear state between scenarios.
+## Setup and test commands
 
-## Setup and commands
-
-Run everything from the project directory:
+Run everything for `viikko4/tdd-ostoskori` from that exercise directory:
 
 ```bash
-cd viikko3/login
+cd viikko4/tdd-ostoskori
 ```
 
-Install project dependencies (uses `uv` metadata from `pyproject.toml`):
+Run Python and tests only through `uv` or the exercise virtual environment. Do not use an uncontrolled global Python or pytest installation.
+
+Using `uv`:
 
 ```bash
 uv sync --group dev
+uv run pytest
 ```
 
-Start the Flask app:
+Tests must be executed with `uv run pytest`.
+
+Run one test module:
 
 ```bash
-uv run python src/index.py
+uv run pytest src/tests/ostoskori_test.py
 ```
 
-The app listens on `http://localhost:5001`.
-
-The app must be running when performing the tests.
-
-Run the full browser test suite:
+Run one test case:
 
 ```bash
-uv run robot src/tests
+uv run pytest src/tests/ostoskori_test.py::TestOstoskori::test_ostoskorin_hinta_ja_tavaroiden_maara_alussa
 ```
 
-Run a single Robot test module:
+Using an existing virtual environment:
 
 ```bash
-uv run robot src/tests/login.robot
+# Linux/macOS/WSL
+source .venv/bin/activate
+# Windows
+.venv\Scripts\activate
+
+python -m pytest
+python -m pytest src/tests/ostoskori_test.py
+python -m pytest src/tests/ostoskori_test.py::TestOstoskori::test_ostoskorin_hinta_ja_tavaroiden_maara_alussa
 ```
 
-Run one specific test case:
+The project defines pytest in `pyproject.toml` as a development dependency. There is no dedicated lint command.
 
-```bash
-uv run robot --test "Login With Correct Credentials" src/tests/login.robot
-```
+## Shopping-cart architecture
 
-There is no dedicated lint command in this project; the repository relies on the Python/Robot test setup rather than a separate static-analysis tool.
+- `Ostos` wraps a `Tuote` and owns quantity behavior. It supplies the product name and calculates quantity times unit price.
+- `Ostoskori` is the collection-level API and currently contains TDD starter stubs.
+- Source modules use direct sibling imports such as `from tuote import Tuote`, so pytest must be run with the exercise's `src` import layout available; keep imports consistent with the existing module style.
+- Tests create a fresh `Ostoskori` in `setUp` and assert both aggregate totals and cart contents.
 
-## Architecture notes that matter
+## Key conventions
 
-- The app is a Flask server with route methods named in pairs such as `render_login` / `handle_login` and `render_register` / `handle_register`.
-- User validation and authentication rules live in `UserService`, not in the route layer; routes only fetch form values and turn exceptions into flashed errors.
-- The repository layer is operation-specific: `find_by_username`, `create`, `delete`, and `delete_all` are the main methods used by the app.
-- The tests are not unit tests; they are end-to-end browser tests using Robot Framework Browser. They rely on the Flask server being running and on the app reset endpoint clearing shared state.
-- The `Test Setup` blocks in the Robot suites call `Reset Application` and then create the default `kalle` user before each scenario. This pattern is important when working on or debugging the app because the state is intentionally in-memory and shared across requests.
-
-## Key conventions in this codebase
-
-- Keep the app state in memory only; no persistence layer is expected.
-- Use the existing error types and messages rather than introducing new validation flows in the route layer. `UserInputError` and `AuthenticationError` are the contract used by the UI.
-- When adding new routes or business logic, follow the existing split:
-  - route logic in `src/app.py`
-  - validation/business behavior in `src/services/user_service.py`
-  - data access in `src/repositories/user_repository.py`
-- Robot tests use `resource.robot` to centralize browser setup and shared keywords. When adding scenarios, follow the same `Suite Setup` / `Suite Teardown` / `Test Setup` layout and reuse helper keywords instead of duplicating browser flow logic.
-- The project uses `requests` in `src/AppLibrary.py` to hit the app’s HTTP endpoints, so new test helpers should stay consistent with that pattern.
-- `src/index.py` is the dev entry point and intentionally runs the server on port `5001` with debug mode enabled; do not change the port unless the tests and helpers are updated together.
-
-## Working with this repo
-
-When making changes, keep the app's existing flow in mind:
-1. Validate input (username & password) in `UserService`.
-2. Persist or fetch via `user_repository`.
-3. Return a flashed error or redirect in the route.
-4. If you change validation logic, update the corresponding Robot tests in `src/tests`.
-
-When debugging a failing flow, check the server route and the corresponding Robot scenario together; the browser tests are the living specification for user-facing behavior.
+- The user writes tests for each functionality; do not edit tests unless explicitly asked.
+- Implement one functionality at a time to make the current test pass, following TDD principles.
+- Before implementation, run the relevant test to confirm it fails; after implementation, run it with `uv run pytest` and verify it passes before moving to the next test.
+- Do not change the code in `src/ostos.py` or `src/tuote.py`.
+- Implement absolutely minimal code that makes the tests pass.
+- Implement methods in `Ostoskori` through the existing API; do not rename or replace it while completing kata tests.
+- Keep quantity behavior consistent with `Ostos.muuta_lukumaaraa`: quantities cannot be negative.
+- Preserve the Finnish domain names and methods used throughout the exercise (`tavaroita_korissa`, `hinta`, `lisaa_tuote`, `poista_tuote`, `tyhjenna`, `ostokset`).
