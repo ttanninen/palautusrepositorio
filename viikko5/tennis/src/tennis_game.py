@@ -26,13 +26,13 @@ class TennisGame:
         else:
             self.player2.add_point()
 
-    def even_score(self, score):
+    def _even_score(self, score):
         if score >= 3:
             return "Deuce"
         else:    
             return self.point(score) + "-All"
 
-    def score_diff_advantage(self, player1, player2):
+    def _endgame_score(self, player1, player2):
         if player1.score > player2.score:
             leader = player1
         else:
@@ -44,12 +44,15 @@ class TennisGame:
         elif abs(score_diff) >= 2:
             return "Win for " + leader.name
 
+    def _normal_score(self, player1, player2):
+        return f"{self.point(player1.score)}-{self.point(player2.score)}"
+
     def get_score(self):
         if self.player1.score == self.player2.score:
-            return self.even_score((self.player1.score))
+            return self._even_score((self.player1.score))
 
         elif self.player1.score >= 4 or self.player2.score >= 4:
-            return self.score_diff_advantage(self.player1, self.player2)
+            return self._endgame_score(self.player1, self.player2)
 
         else:
-            return f"{self.point(self.player1.score)}-{self.point(self.player2.score)}"
+            return self._normal_score(self.player1, self.player2)
