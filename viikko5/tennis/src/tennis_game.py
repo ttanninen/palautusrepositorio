@@ -7,6 +7,8 @@ class Player:
         self.score += 1
 
 class TennisGame:
+    SCORE_DICT = {0: "Love", 1: "Fifteen", 2: "Thirty", 3: "Forty"}
+    
     def __init__(self, player1_name, player2_name):
         self.player1 = Player(player1_name)
         self.player2 = Player(player2_name)
@@ -39,30 +41,11 @@ class TennisGame:
                 return "Win for player2"
 
     def get_score(self):
-        score = ""
-        temp_score = 0
-
         if self.player1.score == self.player2.score:
-            score = self.even_score((self.player1.score))
+            return self.even_score((self.player1.score))
 
         elif self.player1.score >= 4 or self.player2.score >= 4:
-            score = self.score_diff_advantage(self.player1.score, self.player2.score)
+            return self.score_diff_advantage(self.player1.score, self.player2.score)
 
         else:
-            for i in range(1, 3):
-                if i == 1:
-                    temp_score = self.player1.score
-                else:
-                    score = score + "-"
-                    temp_score = self.player2.score
-
-                if temp_score == 0:
-                    score = score + "Love"
-                elif temp_score == 1:
-                    score = score + "Fifteen"
-                elif temp_score == 2:
-                    score = score + "Thirty"
-                elif temp_score == 3:
-                    score = score + "Forty"
-
-        return score
+            return f"{self.SCORE_DICT[self.player1.score]}-{self.SCORE_DICT[self.player2.score]}"
