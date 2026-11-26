@@ -7,11 +7,18 @@ class Player:
         self.score += 1
 
 class TennisGame:
-    SCORE_DICT = {0: "Love", 1: "Fifteen", 2: "Thirty", 3: "Forty"}
-    
     def __init__(self, player1_name, player2_name):
         self.player1 = Player(player1_name)
         self.player2 = Player(player2_name)
+
+    def point(self, point):
+        point_dict = {
+            0: "Love",
+            1: "Fifteen",
+            2: "Thirty",
+            3: "Forty"
+        }
+        return point_dict[point]
 
     def won_point(self, player_name):
         if self.player1.name == player_name:
@@ -20,32 +27,29 @@ class TennisGame:
             self.player2.add_point()
 
     def even_score(self, score):
-        if score == 0:
-            return "Love-All"
-        elif score == 1:
-            return "Fifteen-All"
-        elif score == 2:
-            return "Thirty-All"
-        else:
+        if score >= 3:
             return "Deuce"
+        else:    
+            return self.point(score) + "-All"
 
-    def score_diff_advantage(self, score1, score2):
-            score_diff = score1 - score2
-            if score_diff == 1:
-                return "Advantage player1"
-            elif score_diff == -1:
-                return "Advantage player2"
-            elif score_diff >= 2:
-                return "Win for player1"
-            else:
-                return "Win for player2"
+    def score_diff_advantage(self, player1, player2):
+        if player1.score > player2.score:
+            leader = player1
+        else:
+            leader = player2
+
+        score_diff = player1.score - player2.score
+        if abs(score_diff) == 1:
+            return "Advantage " + leader.name
+        elif abs(score_diff) >= 2:
+            return "Win for " + leader.name
 
     def get_score(self):
         if self.player1.score == self.player2.score:
             return self.even_score((self.player1.score))
 
         elif self.player1.score >= 4 or self.player2.score >= 4:
-            return self.score_diff_advantage(self.player1.score, self.player2.score)
+            return self.score_diff_advantage(self.player1, self.player2)
 
         else:
-            return f"{self.SCORE_DICT[self.player1.score]}-{self.SCORE_DICT[self.player2.score]}"
+            return f"{self.point(self.player1.score)}-{self.point(self.player2.score)}"
