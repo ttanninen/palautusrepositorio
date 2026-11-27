@@ -11,7 +11,6 @@ class TennisGame:
 
     POINTS_TO_WIN = 4
     ADVANTAGE = 1
-    AGVANTAGE_WIN = 2
 
     def __init__(self, player1_name, player2_name):
         self.player1 = Player(player1_name)
